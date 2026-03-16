@@ -36,7 +36,8 @@ save_entry_t* selected_entry;
 code_entry_t* selected_centry;
 int option_index = 0;
 
-extern int sceSystemServiceNavigateUri(int type, const char* uri);
+extern int sceKernelLoadStartModule(const char *name, size_t argc, const void *argv, uint32_t flags, int fd, int fd_offset);
+extern int sceKernelDlsym(int handle, const char *symbol, void **address);
 
 void initMenuOptions(void)
 {
@@ -48,7 +49,14 @@ static void doMainMenu(void)
 
 	if (orbisPadGetButtonPressed(ORBIS_PAD_BUTTON_CROSS))
 	{
-		sceSystemServiceNavigateUri(0, "https://movie.vodu.me/");
+		int handle = sceKernelLoadStartModule("libSceSystemService.sprx", 0, NULL, 0, 0, 0);
+		int (*NavigateUri)(int, const char*) = NULL;
+		
+		sceKernelDlsym(handle, "sceSystemServiceNavigateUri", (void**)&NavigateUri);
+		
+		if (NavigateUri != NULL) {
+			NavigateUri(0, "https://movie.vodu.me/");
+		}
 		return;
 	}
 	else if(orbisPadGetButtonPressed(ORBIS_PAD_BUTTON_CIRCLE) && show_dialog(DIALOG_TYPE_YESNO, _("Exit to XMB?")))
