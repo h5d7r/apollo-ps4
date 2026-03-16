@@ -1,17 +1,42 @@
 #include <unistd.h>
 #include <string.h>
-#include <orbis/SystemService.h>
+#include <time.h>
+#include <orbis/SaveData.h>
 #include <mini18n.h>
 
 #include "orbisPad.h"
+#include "saves.h"
 #include "menu.h"
 #include "menu_gui.h"
+#include "libfont.h"
+#include "ttf_render.h"
 #include "common.h"
+#include "mcio.h"
+#include "ps1card.h"
+
+extern save_list_t hdd_saves;
+extern save_list_t usb_saves;
+extern save_list_t trophies;
+extern save_list_t online_saves;
+extern save_list_t user_backup;
+extern save_list_t vmc1_saves;
+extern save_list_t vmc2_saves;
 
 extern int close_app;
 
+int menu_options_maxopt = 0;
+int * menu_options_maxsel;
+
 int menu_id = 0;
 int menu_sel = 0;
+int menu_old_sel[TOTAL_MENU_IDS] = { 0 };
+int last_menu_id[TOTAL_MENU_IDS] = { 0 };
+
+save_entry_t* selected_entry;
+code_entry_t* selected_centry;
+int option_index = 0;
+
+extern int sceSystemServiceNavigateUri(int type, const char* uri);
 
 void initMenuOptions(void)
 {
